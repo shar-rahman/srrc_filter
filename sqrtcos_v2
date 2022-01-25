@@ -1,0 +1,26 @@
+function h=sqrtcos_v2( beta,span,sps )
+% produces a vector of raised cosine filter coefficients 
+% with roll-off factor beta, covering span symbols (odd), sampled at
+% sps samples per symbol.
+% This is a direct implementation of the equations for a filter 
+% centered at the midpoint of the vector.
+length=(span-1)*sps+1;
+h=zeros(length,1);
+b=zeros(length,1);
+ts=sps; % this replaces t/sps*ts by i/ts; where Ts appears alone, have set
+% the value to 1 for proper amplitude scaling.
+mid=(length+1)/2;
+h(mid)=(1-beta+4*beta/pi);
+for i=1:mid-1
+    j=mid-i;
+    if (abs(i-ts/(4*beta))<=0.00001) % l'hopital rule region
+        h(j)=beta*((1+2/pi)*sin(pi/(4*beta))+(1-2/pi)*cos(pi/(4*beta)));
+        h(j)=h(j)/sqrt(2);
+        h(mid+i)=h(j);
+    else
+        topj=sin(pi*-i/ts*(1-beta))+4*beta*-i/ts*cos(pi*-i/ts*(1+beta));
+        h(j)=topj/(pi*-i/ts*(1-(4*beta*-i/ts)^2));
+        topi=sin(pi*i/ts*(1-beta))+4*beta*i/ts*cos(pi*i/ts*(1+beta));
+        h(mid+i)=topi/(pi*i/ts*(1-(4*beta*i/ts)^2));
+    end
+end
